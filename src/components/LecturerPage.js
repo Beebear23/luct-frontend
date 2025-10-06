@@ -3,9 +3,6 @@ import React, { useState, useEffect } from 'react';
 import LecturerForm from './LecturerForm';
 import ReportList from './ReportList';
 
-// Use your actual Render backend URL
-const API_BASE = 'https://luct-backend-1.onrender.com';
-
 const LecturerMonitoring = () => (
   <div className="card mb-4">
     <div className="card-body">
@@ -29,18 +26,18 @@ const LecturerPage = () => {
     try {
       setLoading(true);
       
-      // Fetch reports
-      const reportsRes = await fetch(`${API_BASE}/api/lecture/reports`);
+      // Fetch reports - using relative path (proxy)
+      const reportsRes = await fetch('/api/lecture/reports');
       const reportsData = await reportsRes.json();
       setReports(reportsData);
       
-      // Fetch classes
-      const classesRes = await fetch(`${API_BASE}/api/lecture/classes/${encodeURIComponent(lecturerName)}`);
+      // Fetch classes - using relative path (proxy)
+      const classesRes = await fetch(`/api/lecture/classes/${encodeURIComponent(lecturerName)}`);
       const classesData = await classesRes.json();
       setClasses(classesData);
       
-      // Fetch ratings
-      const ratingsRes = await fetch(`${API_BASE}/api/lecture/ratings/${encodeURIComponent(lecturerName)}`);
+      // Fetch ratings - using relative path (proxy)
+      const ratingsRes = await fetch(`/api/lecture/ratings/${encodeURIComponent(lecturerName)}`);
       const ratingsData = await ratingsRes.json();
       setRatings(ratingsData);
       
@@ -111,8 +108,7 @@ const LecturerPage = () => {
         <div className="card-body">
           <h3 className="card-title">Submit New Report</h3>
           <LecturerForm 
-            onSubmitted={handleRefresh} 
-            apiBase={API_BASE} // Pass API base to form
+            onSubmitted={handleRefresh}
           />
         </div>
       </div>
