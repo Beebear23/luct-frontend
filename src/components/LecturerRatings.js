@@ -10,7 +10,7 @@ const LecturerRatings = ({ lecturerName }) => {
       try {
         const res = await fetch(`/api/lecture/ratings/${encodeURIComponent(lecturerName)}`);
         const data = await res.json();
-        console.log('Ratings data:', data); // 👈 ADD THIS
+        console.log('Ratings data:', data); 
         setRatings(data);
       } catch (err) {
         console.error('Error fetching ratings:', err);

@@ -9,7 +9,7 @@
   --success: #10b981;        /* Green */
   --warning: #f59e0b;        /* Amber */
   --light: #f8fafc;          /* Light Gray */
-  --dark: #adc7f1;           /* Dark Gray */
+  --dark: #78aafa;           /* Dark Gray */
   --text-light: #ffffff;     /* White */
   --text-dark: #1e293b;      /* Dark Gray */
   --card-bg: #ffffff;        /* White cards */
@@ -200,7 +200,7 @@ h4 { font-size: 1.25rem; }
   font-size: 1.3rem !important;
 }
 
-/* 📝 Forms */
+/* Forms */
 .form-control,
 .form-select {
   background: white !important;
@@ -227,7 +227,7 @@ h4 { font-size: 1.25rem; }
   font-size: 0.95rem !important;
 }
 
-/* 🎨 Buttons */
+/* Buttons */
 .btn {
   border-radius: 8px !important;
   padding: 0.75rem 1.5rem !important;
