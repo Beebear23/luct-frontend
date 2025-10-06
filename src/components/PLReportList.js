@@ -8,7 +8,7 @@ const PLReportList = () => {
 
   const fetchReports = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/pl/reports');
+      const res = await fetch('/api/pl/reports');
       const data = await res.json();
       setReports(data);
     } catch (err) {

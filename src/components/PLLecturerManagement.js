@@ -12,7 +12,7 @@ const PLLectureManagement = () => {
   // Fetch courses from PL endpoint
   const fetchCourses = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/pl/courses');
+      const res = await fetch('/api/pl/courses');
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setCourses(data);

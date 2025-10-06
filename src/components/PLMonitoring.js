@@ -8,7 +8,7 @@ const PLMonitoring = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/pl/monitoring');
+        const res = await fetch('/api/pl/monitoring');
         const data = await res.json();
         setStats(data);
       } catch (err) {

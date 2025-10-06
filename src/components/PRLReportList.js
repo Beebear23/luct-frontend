@@ -10,7 +10,7 @@ const PRLReportList = () => {
   const [currentReportId, setCurrentReportId] = useState(null);
 
   const fetchReports = async () => {
-    const res = await fetch('http://localhost:5000/api/lecture/reports');
+    const res = await fetch('/api/lecture/reports');
     const data = await res.json();
     setReports(data);
   };

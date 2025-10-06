@@ -8,7 +8,7 @@ const StudentMonitoring = ({ studentId }) => {
   useEffect(() => {
     const fetchLectures = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/${studentId}/lectures`);
+        const res = await fetch(`/api/${studentId}/lectures`);
         const data = await res.json();
         setLectures(data);
       } catch (err) {

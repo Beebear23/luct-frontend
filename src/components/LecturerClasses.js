@@ -9,7 +9,7 @@ const LecturerClasses = ({ lecturerName }) => {
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/lecture/classes/${encodeURIComponent(lecturerName)}`);
+        const res = await fetch(`/api/lecture/classes/${encodeURIComponent(lecturerName)}`);
         if (!res.ok) throw new Error('Failed to load classes');
         const data = await res.json();
         setClasses(data);

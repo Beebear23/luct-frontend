@@ -8,7 +8,7 @@ const PRLRatings = () => {
   useEffect(() => {
     const fetchRatings = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/prl/ratings');
+        const res = await fetch('/api/prl/ratings');
         const data = await res.json();
         setRatings(data);
       } catch (err) {

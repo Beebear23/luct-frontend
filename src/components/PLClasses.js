@@ -8,7 +8,7 @@ const PLClasses = () => {
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/pl/lectures');
+        const res = await fetch('/api/pl/lectures');
         const data = await res.json();
         setClasses(data);
       } catch (err) {

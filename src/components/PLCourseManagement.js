@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Button } from 'react-bootstrap';
 
+
 const PLCourseManagement = () => {
   const [courses, setCourses] = useState([]);
   const [courseName, setCourseName] = useState('');
@@ -10,7 +11,7 @@ const PLCourseManagement = () => {
   // Fetch courses for display
   const fetchCourses = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/courses');
+      const res = await fetch('/api/courses');
       if (!res.ok) throw new Error('Failed to fetch courses');
       const data = await res.json();
       setCourses(data);

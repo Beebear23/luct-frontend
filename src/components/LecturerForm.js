@@ -26,7 +26,7 @@ const LecturerForm = ({ onSubmitted }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await fetch('http://localhost:5000/api/lecture/report', {
+      await fetch('/api/lecture/report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

@@ -8,7 +8,7 @@ const StudentRatingsList = ({ studentId }) => {
   useEffect(() => {
     const fetchRatings = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/${studentId}/ratings`);
+        const res = await fetch(`/api/${studentId}/ratings`);
         const data = await res.json();
         setRatings(data);
       } catch (err) {

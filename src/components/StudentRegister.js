@@ -17,7 +17,7 @@ const StudentRegister = ({ onRegisterSuccess, onSwitch }) => {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/student/register', {
+      const res = await fetch('/api/student/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

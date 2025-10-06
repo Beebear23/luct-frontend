@@ -8,7 +8,7 @@ const LecturerRatings = ({ lecturerName }) => {
   useEffect(() => {
     const fetchRatings = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/lecture/ratings/${encodeURIComponent(lecturerName)}`);
+        const res = await fetch(`/api/lecture/ratings/${encodeURIComponent(lecturerName)}`);
         const data = await res.json();
         console.log('Ratings data:', data); // 👈 ADD THIS
         setRatings(data);

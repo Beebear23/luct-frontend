@@ -6,7 +6,7 @@ const PRLCourseList = () => {
   const [courses, setCourses] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/prl/courses')
+    fetch('/api/prl/courses')
       .then(res => {
         if (!res.ok) throw new Error('Network response was not ok');
         return res.json();

@@ -2,13 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { Card, ListGroup } from 'react-bootstrap';
 
+
 const PRLClasses = () => {
   const [classes, setClasses] = useState([]);
 
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/prl/classes');
+        const res = await fetch('/api/prl/classes');
         const data = await res.json();
         setClasses(data);
       } catch (err) {
