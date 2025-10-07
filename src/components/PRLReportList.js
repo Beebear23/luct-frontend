@@ -32,7 +32,7 @@ const PRLReportList = () => {
 
   const handleSubmitFeedback = async () => {
     if (!feedback) return alert('Feedback cannot be empty');
-    const res = await fetch(`http://localhost:5000/api/lecture/report/${currentReportId}/feedback`, {
+    const res = await fetch(`/api/lecture/report/${currentReportId}/feedback`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ feedback })
