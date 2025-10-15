@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+// src/App.js - Enhanced Implementation with Tables and CRUD
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import * as api from './api';
-import { BookOpen, Users, FileText, BarChart3, Star, Calendar, Search, Download, X, Plus, Check, XCircle } from 'lucide-react';
+import { BookOpen, Users, FileText, BarChart3, Star, Calendar, Search, Download, Menu, X, Edit, Trash2, Eye, Plus, Check, XCircle } from 'lucide-react';
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -13,8 +14,8 @@ function App() {
   
   // CRUD state
   const [editingReport, setEditingReport] = useState(null);
-  const [feedbackReport, setFeedbackReport] = useState(null);
-  const [feedbackText, setFeedbackText] = useState('');
+  const [viewingReport, setViewingReport] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   
   // Rating state
   const [selectedReport, setSelectedReport] = useState(null);
@@ -53,7 +54,28 @@ function App() {
     }
   }, []);
 
-  const loadReports = useCallback(async () => {
+  useEffect(() => {
+    if (currentUser && (currentPage === 'dashboard' || currentPage === 'reports')) {
+      loadReports();
+    }
+  }, [currentUser, currentPage]);
+
+  useEffect(() => {
+    if (currentUser && currentPage === 'rating') {
+      loadRatings();
+    }
+  }, [currentUser, currentPage]);
+
+  useEffect(() => {
+    if (currentUser && currentPage === 'reports') {
+      const timeoutId = setTimeout(() => {
+        loadReports();
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [searchTerm]);
+
+  const loadReports = async () => {
     try {
       setLoading(true);
       const data = await api.getReports({ search: searchTerm });
@@ -63,37 +85,16 @@ function App() {
     } finally {
       setLoading(false);
     }
-  }, [searchTerm]);
+  };
 
-  const loadRatings = useCallback(async () => {
+  const loadRatings = async () => {
     try {
       const data = await api.getRatings();
       setRatings(data);
     } catch (error) {
       console.error('Error loading ratings:', error);
     }
-  }, []);
-
-  useEffect(() => {
-    if (currentUser && (currentPage === 'dashboard' || currentPage === 'reports')) {
-      loadReports();
-    }
-  }, [currentUser, currentPage, loadReports]);
-
-  useEffect(() => {
-    if (currentUser && currentPage === 'rating') {
-      loadRatings();
-    }
-  }, [currentUser, currentPage, loadRatings]);
-
-  useEffect(() => {
-    if (currentUser && currentPage === 'reports') {
-      const timeoutId = setTimeout(() => {
-        loadReports();
-      }, 500);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [searchTerm, currentUser, currentPage, loadReports]);
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -151,10 +152,10 @@ function App() {
     setRatings([]);
   };
 
-  const handleInputChange = useCallback((e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  }, []);
+    setFormData({ ...formData, [name]: value });
+  };
 
   const handleSubmitReport = async (e) => {
     e.preventDefault();
@@ -195,6 +196,41 @@ function App() {
     }
   };
 
+  const handleEditReport = (report) => {
+    setEditingReport(report);
+    setFormData({
+      faculty: report.faculty || 'Faculty of ICT',
+      className: report.class_name || '',
+      week: report.week || '',
+      date: report.date || '',
+      courseName: report.course_name || '',
+      courseCode: report.course_code || '',
+      lecturerName: report.lecturer_name || '',
+      present: report.students_present || '',
+      registered: report.students_registered || '30',
+      venue: report.venue || '',
+      time: report.time || '',
+      topic: report.topic || '',
+      outcomes: report.learning_outcomes || '',
+      recommendations: report.recommendations || ''
+    });
+    setCurrentPage('newReport');
+  };
+
+  const handleDeleteReport = async (reportId) => {
+    try {
+      setLoading(true);
+      await api.deleteReport(reportId);
+      alert('Report deleted successfully!');
+      setShowDeleteConfirm(null);
+      loadReports();
+    } catch (error) {
+      alert(error.message || 'Failed to delete report');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleApprove = async (reportId) => {
     try {
       setLoading(true);
@@ -219,26 +255,6 @@ function App() {
       }
     } catch (error) {
       alert(error.message || 'Failed to reject report');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddFeedback = async (reportId) => {
-    if (!feedbackText.trim()) {
-      alert('Please enter feedback text');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      await api.addFeedback(reportId, { feedback: feedbackText });
-      alert('Feedback added successfully!');
-      setFeedbackReport(null);
-      setFeedbackText('');
-      loadReports();
-    } catch (error) {
-      alert(error.message || 'Failed to add feedback');
     } finally {
       setLoading(false);
     }
@@ -299,11 +315,11 @@ function App() {
             <form onSubmit={handleRegister} className="space-y-4">
               <div className="form-group">
                 <label>Full Name</label>
-                <input type="text" name="name" placeholder="Name" required />
+                <input type="text" name="name" placeholder="John Doe" required />
               </div>
               <div className="form-group">
                 <label>Email</label>
-                <input type="email" name="email" placeholder="email" required />
+                <input type="email" name="email" placeholder="your.email@luct.ac.ls" required />
               </div>
               <div className="form-group">
                 <label>Password</label>
@@ -385,19 +401,14 @@ function App() {
     );
   }
 
-  const menuItems = currentUser?.role === 'student' 
-    ? [
-        { id: 'monitoring', label: 'Monitoring', icon: Calendar },
-        { id: 'rating', label: 'Rating', icon: Star }
-      ]
-    : [
-        { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-        { id: 'reports', label: 'Reports', icon: FileText },
-        ...(currentUser?.role === 'lecturer' ? [{ id: 'newReport', label: 'New Report', icon: Plus }] : []),
-        { id: 'classes', label: 'Classes', icon: Users },
-        { id: 'monitoring', label: 'Monitoring', icon: Calendar },
-        { id: 'rating', label: 'Rating', icon: Star }
-      ];
+  const menuItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+    { id: 'reports', label: 'Reports', icon: FileText },
+    ...(currentUser.role === 'lecturer' ? [{ id: 'newReport', label: 'New Report', icon: Plus }] : []),
+    { id: 'classes', label: 'Classes', icon: Users },
+    { id: 'monitoring', label: 'Monitoring', icon: Calendar },
+    { id: 'rating', label: 'Rating', icon: Star }
+  ];
 
   const Layout = ({ children }) => (
     <div className="app-container">
@@ -430,6 +441,102 @@ function App() {
       
       <div className="main-content">
         <main className="content">{children}</main>
+      </div>
+    </div>
+  );
+
+  // VIEW REPORT MODAL
+  const ViewReportModal = ({ report, onClose }) => (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem'}}>
+          <h2>Report Details</h2>
+          <button onClick={onClose} style={{background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)'}}>
+            <X size={24} />
+          </button>
+        </div>
+        
+        <div className="view-report-grid">
+          <div className="view-item">
+            <label>Course Name</label>
+            <p>{report.course_name}</p>
+          </div>
+          <div className="view-item">
+            <label>Course Code</label>
+            <p>{report.course_code}</p>
+          </div>
+          <div className="view-item">
+            <label>Class</label>
+            <p>{report.class_name}</p>
+          </div>
+          <div className="view-item">
+            <label>Week</label>
+            <p>{report.week}</p>
+          </div>
+          <div className="view-item">
+            <label>Date</label>
+            <p>{report.date}</p>
+          </div>
+          <div className="view-item">
+            <label>Time</label>
+            <p>{report.time}</p>
+          </div>
+          <div className="view-item">
+            <label>Lecturer</label>
+            <p>{report.lecturer_name}</p>
+          </div>
+          <div className="view-item">
+            <label>Venue</label>
+            <p>{report.venue}</p>
+          </div>
+          <div className="view-item">
+            <label>Attendance</label>
+            <p>{report.students_present} / {report.students_registered}</p>
+          </div>
+          <div className="view-item">
+            <label>Status</label>
+            <p><span className={`badge ${report.status}`}>{report.status}</span></p>
+          </div>
+        </div>
+        
+        <div className="view-item" style={{marginTop: '1rem'}}>
+          <label>Topic</label>
+          <p>{report.topic}</p>
+        </div>
+        
+        <div className="view-item" style={{marginTop: '1rem'}}>
+          <label>Learning Outcomes</label>
+          <p>{report.learning_outcomes}</p>
+        </div>
+        
+        <div className="view-item" style={{marginTop: '1rem'}}>
+          <label>Recommendations</label>
+          <p>{report.recommendations}</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  // DELETE CONFIRMATION MODAL
+  const DeleteConfirmModal = ({ report, onConfirm, onCancel }) => (
+    <div className="modal-overlay" onClick={onCancel}>
+      <div className="modal-content modal-small" onClick={(e) => e.stopPropagation()}>
+        <div style={{textAlign: 'center'}}>
+          <div style={{background: 'rgba(239, 68, 68, 0.15)', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem'}}>
+            <Trash2 size={30} color="var(--danger)" />
+          </div>
+          <h2>Delete Report?</h2>
+          <p style={{color: 'var(--text-secondary)', margin: '1rem 0'}}>
+            Are you sure you want to delete this report? This action cannot be undone.
+          </p>
+          <p style={{fontWeight: 'bold', marginBottom: '2rem'}}>{report.course_name} - {report.week}</p>
+          <div style={{display: 'flex', gap: '1rem', justifyContent: 'center'}}>
+            <button onClick={onCancel} className="btn-secondary">Cancel</button>
+            <button onClick={() => onConfirm(report.id)} className="btn-danger" disabled={loading}>
+              {loading ? 'Deleting...' : 'Delete'}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -648,7 +755,7 @@ function App() {
     );
   }
 
-  // REPORTS
+ // REPORTS
   if (currentPage === 'reports') {
     return (
       <Layout>
@@ -676,50 +783,6 @@ function App() {
           </div>
         </div>
 
-        {/* Feedback Modal */}
-        {feedbackReport && (
-          <div className="modal-overlay" onClick={() => setFeedbackReport(null)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{maxWidth: '500px'}}>
-              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem'}}>
-                <h2>Add Feedback</h2>
-                <button onClick={() => setFeedbackReport(null)} style={{background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)'}}>
-                  <X size={24} />
-                </button>
-              </div>
-              
-              <div style={{marginBottom: '1rem'}}>
-                <p style={{color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>
-                  <strong>Course:</strong> {feedbackReport.course_name}
-                </p>
-                <p style={{color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>
-                  <strong>Week:</strong> {feedbackReport.week}
-                </p>
-                <p style={{color: 'var(--text-secondary)'}}>
-                  <strong>Lecturer:</strong> {feedbackReport.lecturer_name}
-                </p>
-              </div>
-
-              <div className="form-group">
-                <label>Feedback</label>
-                <textarea
-                  value={feedbackText}
-                  onChange={(e) => setFeedbackText(e.target.value)}
-                  rows="5"
-                  placeholder="Enter your feedback here..."
-                  style={{width: '100%'}}
-                />
-              </div>
-
-              <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
-                <button onClick={() => setFeedbackReport(null)} className="btn-secondary">Cancel</button>
-                <button onClick={() => handleAddFeedback(feedbackReport.id)} className="btn-primary" disabled={loading}>
-                  {loading ? 'Submitting...' : 'Submit Feedback'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
         {filteredReports.length === 0 ? (
           <div className="card">
             <p style={{color: 'var(--text-secondary)'}}>No reports found</p>
@@ -745,33 +808,10 @@ function App() {
                 <p><strong>Outcomes:</strong> {report.learning_outcomes}</p>
                 <p><strong>Recommendations:</strong> {report.recommendations}</p>
               </div>
-              
-              {/* Display existing feedback */}
-              {report.feedback && (
-                <div style={{marginTop: '15px', padding: '15px', background: 'var(--card-hover)', borderRadius: '8px', borderLeft: '4px solid var(--primary)'}}>
-                  <p style={{margin: '0 0 5px 0', fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 'bold'}}>FEEDBACK:</p>
-                  <p style={{margin: 0, color: 'var(--text-primary)'}}>{report.feedback}</p>
-                </div>
-              )}
-
-              {currentUser.role === 'prl' && (
+              {currentUser.role === 'prl' && report.status === 'pending' && (
                 <div style={{display: 'flex', gap: '10px', marginTop: '15px', paddingTop: '15px', borderTop: '1px solid var(--border)'}}>
-                  {report.status === 'pending' && (
-                    <>
-                      <button onClick={() => handleApprove(report.id)} className="btn-success" disabled={loading}>Approve</button>
-                      <button onClick={() => handleReject(report.id)} className="btn-danger" disabled={loading}>Reject</button>
-                    </>
-                  )}
-                  <button 
-                    onClick={() => {
-                      setFeedbackReport(report);
-                      setFeedbackText(report.feedback || '');
-                    }} 
-                    className="btn-primary" 
-                    disabled={loading}
-                  >
-                    {report.feedback ? 'Edit Feedback' : 'Add Feedback'}
-                  </button>
+                  <button onClick={() => handleApprove(report.id)} className="btn-success" disabled={loading}>Approve</button>
+                  <button onClick={() => handleReject(report.id)} className="btn-danger" disabled={loading}>Reject</button>
                 </div>
               )}
             </div>
@@ -783,183 +823,57 @@ function App() {
 
   // CLASSES
   if (currentPage === 'classes') {
-    // Extract unique classes from reports
-    const classesMap = {};
-    reports.forEach(report => {
-      const className = report.class_name;
-      if (className && !classesMap[className]) {
-        classesMap[className] = {
-          name: className,
-          students: report.students_registered || 0,
-          lecturer: report.lecturer_name || 'N/A',
-          venue: report.venue || 'N/A',
-          reports: 1,
-          lastActivity: report.date
-        };
-      } else if (className) {
-        classesMap[className].reports += 1;
-        if (new Date(report.date) > new Date(classesMap[className].lastActivity)) {
-          classesMap[className].lastActivity = report.date;
-        }
-      }
-    });
-
-    const classes = Object.values(classesMap);
-    const totalStudents = classes.reduce((sum, c) => sum + c.students, 0);
-    const avgClassSize = classes.length > 0 ? Math.round(totalStudents / classes.length) : 0;
+    const classes = [
+      { id: 1, name: 'DIT 1A', program: 'DIT', students: 30, lecturer: 'Dr. Jane Smith', room: 'Lab A' },
+      { id: 2, name: 'DIT 1B', program: 'DIT', students: 28, lecturer: 'Dr. John Doe', room: 'Lab B' },
+      { id: 3, name: 'DBIT 2A', program: 'DBIT', students: 25, lecturer: 'Prof. Mary Johnson', room: 'Room 301' },
+      { id: 4, name: 'BSc BIT 3A', program: 'BSc BIT', students: 22, lecturer: 'Dr. James Wilson', room: 'Room 405' }
+    ];
 
     return (
       <Layout>
         <h1>Classes</h1>
         <div className="stats-container">
           <div className="stat-card blue">
-            <Users size={40} style={{marginBottom: '1rem', opacity: 0.8}} />
             <h3>{classes.length}</h3>
             <p>Total Classes</p>
           </div>
           <div className="stat-card green">
-            <Users size={40} style={{marginBottom: '1rem', opacity: 0.8}} />
-            <h3>{totalStudents}</h3>
+            <h3>{classes.reduce((sum, c) => sum + c.students, 0)}</h3>
             <p>Total Students</p>
           </div>
           <div className="stat-card yellow">
-            <BarChart3 size={40} style={{marginBottom: '1rem', opacity: 0.8}} />
-            <h3>{avgClassSize}</h3>
+            <h3>{Math.round(classes.reduce((sum, c) => sum + c.students, 0) / classes.length)}</h3>
             <p>Avg Class Size</p>
-          </div>
-          <div className="stat-card purple">
-            <FileText size={40} style={{marginBottom: '1rem', opacity: 0.8}} />
-            <h3>{reports.length}</h3>
-            <p>Total Reports</p>
           </div>
         </div>
 
-        {classes.length === 0 ? (
-          <div className="card">
-            <p style={{color: 'var(--text-secondary)', textAlign: 'center'}}>No classes found. Reports need to be created first.</p>
-          </div>
-        ) : (
-          <div className="classes-grid">
-            {classes.map((cls, index) => (
-              <div key={index} className="class-card">
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px'}}>
-                  <h3 style={{margin: 0}}>{cls.name}</h3>
-                  <span className="badge approved">{cls.reports} Reports</span>
-                </div>
-                <p style={{marginBottom: '10px', color: 'var(--text-secondary)'}}>👨‍🏫 {cls.lecturer}</p>
-                <p style={{marginBottom: '10px', color: 'var(--text-secondary)'}}>👥 {cls.students} Students</p>
-                <p style={{marginBottom: '10px', color: 'var(--text-secondary)'}}>🏫 {cls.venue}</p>
-                <p style={{marginBottom: '15px', fontSize: '12px', color: 'var(--text-secondary)'}}>
-                  Last activity: {cls.lastActivity}
-                </p>
-                <button 
-                  className="btn-primary" 
-                  style={{width: '100%'}}
-                  onClick={() => {
-                    setSearchTerm(cls.name);
-                    setCurrentPage('reports');
-                  }}
-                >
-                  View Reports
-                </button>
+        <div className="classes-grid">
+          {classes.map(cls => (
+            <div key={cls.id} className="class-card">
+              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px'}}>
+                <h3 style={{margin: 0}}>{cls.name}</h3>
+                <span className="badge pending">{cls.program}</span>
               </div>
-            ))}
-          </div>
-        )}
+              <p style={{marginBottom: '10px', color: 'var(--text-secondary)'}}>👨‍🏫 {cls.lecturer}</p>
+              <p style={{marginBottom: '10px', color: 'var(--text-secondary)'}}>👥 {cls.students} Students</p>
+              <p style={{marginBottom: '15px', color: 'var(--text-secondary)'}}>🏫 {cls.room}</p>
+              <button className="btn-primary" style={{width: '100%'}}>View Details</button>
+            </div>
+          ))}
+        </div>
       </Layout>
     );
   }
 
   // MONITORING
   if (currentPage === 'monitoring') {
-    // Generate activities from actual reports and ratings
-    const activities = [];
-
-    // Add report activities
-    reports.forEach(report => {
-      activities.push({
-        id: `report-${report.id}`,
-        user: report.lecturer_name || 'Unknown Lecturer',
-        action: 'Created Report',
-        course: report.course_name || 'N/A',
-        time: report.date || 'N/A',
-        timestamp: new Date(report.created_at || report.date).getTime(),
-        type: 'create',
-        status: report.status
-      });
-
-      // Add approval/rejection activities
-      if (report.status === 'approved') {
-        activities.push({
-          id: `approve-${report.id}`,
-          user: 'Principal Lecturer',
-          action: 'Approved Report',
-          course: report.course_name || 'N/A',
-          time: report.date || 'N/A',
-          timestamp: new Date(report.updated_at || report.date).getTime(),
-          type: 'approve',
-          status: 'approved'
-        });
-      } else if (report.status === 'rejected') {
-        activities.push({
-          id: `reject-${report.id}`,
-          user: 'Principal Lecturer',
-          action: 'Rejected Report',
-          course: report.course_name || 'N/A',
-          time: report.date || 'N/A',
-          timestamp: new Date(report.updated_at || report.date).getTime(),
-          type: 'reject',
-          status: 'rejected'
-        });
-      }
-
-      // Add feedback activities if feedback exists
-      if (report.feedback) {
-        activities.push({
-          id: `feedback-${report.id}`,
-          user: 'Principal Lecturer',
-          action: 'Added Feedback',
-          course: report.course_name || 'N/A',
-          time: report.date || 'N/A',
-          timestamp: new Date(report.updated_at || report.date).getTime(),
-          type: 'feedback',
-          status: report.status
-        });
-      }
-    });
-
-    // Add rating activities
-    ratings.forEach(rating => {
-      const report = reports.find(r => r.id === rating.report_id);
-      activities.push({
-        id: `rating-${rating.id}`,
-        user: rating.user_name || rating.user || 'Anonymous',
-        action: 'Submitted Rating',
-        course: report ? report.course_name : rating.course_name || 'N/A',
-        time: new Date(rating.created_at).toLocaleDateString(),
-        timestamp: new Date(rating.created_at).getTime(),
-        type: 'rating',
-        rating: rating.rating
-      });
-    });
-
-    // Sort activities by timestamp (most recent first)
-    const sortedActivities = activities.sort((a, b) => b.timestamp - a.timestamp).slice(0, 20);
-
-    // Calculate time ago
-    const getTimeAgo = (timestamp) => {
-      const now = Date.now();
-      const diff = now - timestamp;
-      const minutes = Math.floor(diff / 60000);
-      const hours = Math.floor(diff / 3600000);
-      const days = Math.floor(diff / 86400000);
-
-      if (minutes < 1) return 'Just now';
-      if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-      if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-      if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`;
-      return new Date(timestamp).toLocaleDateString();
-    };
+    const activities = [
+      { id: 1, user: 'Dr. Jane Smith', action: 'Created Report', course: 'Database Management', time: '2 hours ago', type: 'create' },
+      { id: 2, user: 'Prof. Michael Brown', action: 'Approved Report', course: 'Web Development', time: '3 hours ago', type: 'approve' },
+      { id: 3, user: 'Dr. Sarah Johnson', action: 'Added Feedback', course: 'Software Engineering', time: '5 hours ago', type: 'feedback' },
+      { id: 4, user: 'John Doe', action: 'Submitted Rating', course: 'Database Management', time: '1 day ago', type: 'rating' }
+    ];
 
     const getIcon = (type) => {
       switch(type) {
@@ -972,59 +886,40 @@ function App() {
       }
     };
 
-    const approvedCount = reports.filter(r => r.status === 'approved').length;
-    const pendingCount = reports.filter(r => r.status === 'pending').length;
-
     return (
       <Layout>
         <h1>Activity Monitoring</h1>
         <div className="stats-container">
           <div className="stat-card blue">
-            <FileText size={40} style={{marginBottom: '1rem', opacity: 0.8}} />
-            <h3>{reports.length}</h3>
-            <p>Total Reports</p>
+            <h3>{activities.length}</h3>
+            <p>Total Activities</p>
           </div>
           <div className="stat-card green">
-            <Check size={40} style={{marginBottom: '1rem', opacity: 0.8}} />
-            <h3>{approvedCount}</h3>
-            <p>Approved</p>
+            <h3>{activities.filter(a => a.type === 'approve').length}</h3>
+            <p>Approvals</p>
           </div>
           <div className="stat-card yellow">
-            <Calendar size={40} style={{marginBottom: '1rem', opacity: 0.8}} />
-            <h3>{pendingCount}</h3>
-            <p>Pending</p>
+            <h3>{activities.filter(a => a.type === 'create').length}</h3>
+            <p>New Reports</p>
           </div>
           <div className="stat-card red">
-            <Star size={40} style={{marginBottom: '1rem', opacity: 0.8}} />
-            <h3>{ratings.length}</h3>
+            <h3>{activities.filter(a => a.type === 'rating').length}</h3>
             <p>Ratings</p>
           </div>
         </div>
 
         <div className="card">
           <h2>Recent Activity</h2>
-          {sortedActivities.length === 0 ? (
-            <p style={{color: 'var(--text-secondary)', textAlign: 'center', padding: '2rem'}}>No activities yet</p>
-          ) : (
-            sortedActivities.map(activity => (
-              <div key={activity.id} className="activity-item">
-                <div className="activity-icon">{getIcon(activity.type)}</div>
-                <div style={{flex: 1}}>
-                  <h4 style={{margin: '0 0 5px 0'}}>{activity.user}</h4>
-                  <p style={{margin: '0 0 5px 0', color: 'var(--text-secondary)'}}>
-                    <strong>{activity.action}</strong> - {activity.course}
-                    {activity.rating && <span style={{marginLeft: '10px', color: 'var(--warning)'}}>★ {activity.rating}/5</span>}
-                  </p>
-                  <span style={{fontSize: '12px', color: 'var(--text-secondary)', fontStyle: 'italic'}}>
-                    {getTimeAgo(activity.timestamp)}
-                  </span>
-                </div>
-                {activity.status && (
-                  <span className={`badge ${activity.status}`}>{activity.status}</span>
-                )}
+          {activities.map(activity => (
+            <div key={activity.id} className="activity-item">
+              <div className="activity-icon">{getIcon(activity.type)}</div>
+              <div style={{flex: 1}}>
+                <h4 style={{margin: '0 0 5px 0'}}>{activity.user}</h4>
+                <p style={{margin: '0 0 5px 0', color: 'var(--text-secondary)'}}><strong>{activity.action}</strong> - {activity.course}</p>
+                <span style={{fontSize: '12px', color: 'var(--text-secondary)', fontStyle: 'italic'}}>{activity.time}</span>
               </div>
-            ))
-          )}
+            </div>
+          ))}
         </div>
       </Layout>
     );
@@ -1113,7 +1008,7 @@ function App() {
           ) : (
             <div>
               {ratings.map(r => {
-                const report = reports.find(rep => rep.id === r.report_id);
+                const report = reports.find(rep => rep.id == r.report_id);
                 return (
                   <div key={r.id} style={{padding: '20px', background: 'var(--card-hover)', borderRadius: '12px', marginBottom: '15px', borderLeft: '4px solid var(--warning)'}}>
                     <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '10px'}}>
