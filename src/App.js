@@ -401,7 +401,7 @@ function App() {
   const Layout = ({ children }) => (
     <div className="app-container">
       <nav className="navbar">
-        <h2>LUCT SYSTEM</h2>
+        <h2>LUCT</h2>
         
         <div className="nav-center">
           {menuItems.map(item => {
