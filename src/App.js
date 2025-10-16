@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import * as api from './api';
-import { BookOpen, Users, FileText, BarChart3, Star, Calendar, Search, Download, X, Plus, Check, XCircle } from 'lucide-react';
+import { BookOpen, Users, FileText, BarChart3, Star, Calendar, Search, Download, X, Plus, Check, XCircle, TrendingUp, Award, } from 'lucide-react';
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -11,18 +11,15 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   
-  // CRUD state
   const [editingReport, setEditingReport] = useState(null);
   const [feedbackReport, setFeedbackReport] = useState(null);
   const [feedbackText, setFeedbackText] = useState('');
   
-  // Rating state
   const [selectedReport, setSelectedReport] = useState(null);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [ratings, setRatings] = useState([]);
   
-  // Form state
   const [formData, setFormData] = useState({
     faculty: 'Faculty of ICT',
     className: '',
@@ -161,12 +158,10 @@ function App() {
     try {
       setLoading(true);
       if (editingReport) {
-        // Update existing report
         await api.updateReport(editingReport.id, formData);
         alert('Report updated successfully!');
         setEditingReport(null);
       } else {
-        // Create new report
         await api.createReport(formData);
         alert('Report submitted successfully!');
       }
@@ -282,14 +277,13 @@ function App() {
     (report.lecturer_name || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // LOGIN PAGE
   if (!currentUser) {
     if (showRegister) {
       return (
         <div className="login-container">
           <div className="login-box">
             <div className="text-center mb-8">
-              <div className="bg-gradient-to-r from-cyan-500 to-purple-500 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="logo-circle">
                 <BookOpen className="text-white" size={40} />
               </div>
               <h1 className="text-3xl font-bold mb-2">LUCT</h1>
@@ -329,7 +323,7 @@ function App() {
               </button>
 
               <div className="text-center mt-6">
-                <button type="button" onClick={() => setShowRegister(false)} className="text-sm hover:underline" style={{color: 'var(--primary)', background: 'none', padding: 0}}>
+                <button type="button" onClick={() => setShowRegister(false)} className="link-button">
                   Already have an account? Login
                 </button>
               </div>
@@ -343,7 +337,7 @@ function App() {
       <div className="login-container">
         <div className="login-box">
           <div className="text-center mb-8">
-            <div className="bg-gradient-to-r from-cyan-500 to-purple-500 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="logo-circle">
               <BookOpen className="text-white" size={40} />
             </div>
             <h1 className="text-3xl font-bold mb-2">LUCT</h1>
@@ -352,7 +346,7 @@ function App() {
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="form-group">
               <label>Email</label>
-              <input type="email" name="email" placeholder="name" required />
+              <input type="email" name="email" placeholder="email" required />
             </div>
             <div className="form-group">
               <label>Password</label>
@@ -374,7 +368,7 @@ function App() {
             </button>
 
             <div className="text-center mt-6">
-              <button type="button" onClick={() => setShowRegister(true)} className="text-sm hover:underline" style={{color: 'var(--primary)', background: 'none', padding: 0}}>
+              <button type="button" onClick={() => setShowRegister(true)} className="link-button">
                 Register
               </button>
             </div>
@@ -401,7 +395,7 @@ function App() {
   const Layout = ({ children }) => (
     <div className="app-container">
       <nav className="navbar">
-        <h2>LUCT</h2>
+        <h2>LUCT SYSTEM</h2>
         
         <div className="nav-center">
           {menuItems.map(item => {
@@ -420,7 +414,7 @@ function App() {
         </div>
         
         <div className="nav-right">
-          <span style={{background: 'var(--card-hover)', padding: '0.5rem 1rem', borderRadius: '8px', whiteSpace: 'nowrap'}}>
+          <span className="user-badge">
             {currentUser.name || currentUser.email} ({currentUser.role.toUpperCase()})
           </span>
           <button onClick={handleLogout} className="btn-secondary">Logout</button>
@@ -433,7 +427,6 @@ function App() {
     </div>
   );
 
-  // DASHBOARD WITH CHARTS
   if (currentPage === 'dashboard') {
     const totalReports = reports.length;
     const approvedReports = reports.filter(r => r.status === 'approved').length;
@@ -445,28 +438,28 @@ function App() {
         <h1>Dashboard Overview</h1>
         <div className="stats-container">
           <div className="stat-card blue">
-            <FileText size={40} style={{marginBottom: '1rem', opacity: 0.8}} />
+            <FileText size={40} className="stat-icon" />
             <h3>{totalReports}</h3>
             <p>Total Reports</p>
           </div>
           <div className="stat-card green">
-            <Check size={40} style={{marginBottom: '1rem', opacity: 0.8}} />
+            <Check size={40} className="stat-icon" />
             <h3>{approvedReports}</h3>
             <p>Approved</p>
           </div>
           <div className="stat-card yellow">
-            <Calendar size={40} style={{marginBottom: '1rem', opacity: 0.8}} />
+            <Calendar size={40} className="stat-icon" />
             <h3>{pendingReports}</h3>
             <p>Pending Review</p>
           </div>
           <div className="stat-card red">
-            <XCircle size={40} style={{marginBottom: '1rem', opacity: 0.8}} />
+            <XCircle size={40} className="stat-icon" />
             <h3>{rejectedReports}</h3>
             <p>Rejected</p>
           </div>
         </div>
 
-        <div style={{display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '1.5rem'}}>
+        <div className="dashboard-grid">
           <div className="card">
             <h2>Recent Reports</h2>
             <div className="table-container">
@@ -492,7 +485,7 @@ function App() {
                   ))}
                   {reports.length === 0 && (
                     <tr>
-                      <td colSpan="5" style={{textAlign: 'center', color: 'var(--text-secondary)'}}>No reports yet</td>
+                      <td colSpan="5" className="no-data">No reports yet</td>
                     </tr>
                   )}
                 </tbody>
@@ -502,34 +495,34 @@ function App() {
 
           <div className="card">
             <h2>Status Distribution</h2>
-            <div style={{marginTop: '2rem'}}>
+            <div className="distribution-container">
               <div className="progress-item">
-                <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem'}}>
+                <div className="progress-label">
                   <span>Approved</span>
                   <span>{totalReports > 0 ? Math.round((approvedReports / totalReports) * 100) : 0}%</span>
                 </div>
                 <div className="progress-bar">
-                  <div className="progress-fill green" style={{width: `${totalReports > 0 ? (approvedReports / totalReports) * 100 : 0}%`}}></div>
+                  <div className="progress-fill green" data-width={totalReports > 0 ? (approvedReports / totalReports) * 100 : 0}></div>
                 </div>
               </div>
               
               <div className="progress-item">
-                <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem'}}>
+                <div className="progress-label">
                   <span>Pending</span>
                   <span>{totalReports > 0 ? Math.round((pendingReports / totalReports) * 100) : 0}%</span>
                 </div>
                 <div className="progress-bar">
-                  <div className="progress-fill yellow" style={{width: `${totalReports > 0 ? (pendingReports / totalReports) * 100 : 0}%`}}></div>
+                  <div className="progress-fill yellow" data-width={totalReports > 0 ? (pendingReports / totalReports) * 100 : 0}></div>
                 </div>
               </div>
               
               <div className="progress-item">
-                <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem'}}>
+                <div className="progress-label">
                   <span>Rejected</span>
                   <span>{totalReports > 0 ? Math.round((rejectedReports / totalReports) * 100) : 0}%</span>
                 </div>
                 <div className="progress-bar">
-                  <div className="progress-fill red" style={{width: `${totalReports > 0 ? (rejectedReports / totalReports) * 100 : 0}%`}}></div>
+                  <div className="progress-fill red" data-width={totalReports > 0 ? (rejectedReports / totalReports) * 100 : 0}></div>
                 </div>
               </div>
             </div>
@@ -539,14 +532,13 @@ function App() {
     );
   }
 
-  // NEW REPORT / EDIT REPORT
   if (currentPage === 'newReport') {
     return (
       <Layout>
         <h1>{editingReport ? 'Edit Report' : 'Create New Report'}</h1>
         <div className="card">
           <form onSubmit={handleSubmitReport}>
-            <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px'}}>
+            <div className="form-grid-2">
               <div className="form-group">
                 <label>Faculty Name</label>
                 <input type="text" name="faculty" value={formData.faculty} onChange={handleInputChange} required />
@@ -610,7 +602,7 @@ function App() {
               <label>Recommendations</label>
               <textarea name="recommendations" value={formData.recommendations} onChange={handleInputChange} rows="3" required />
             </div>
-            <div style={{display: 'flex', gap: '15px', marginTop: '30px'}}>
+            <div className="button-group">
               <button type="submit" className="btn-primary" disabled={loading}>
                 {loading ? (editingReport ? 'Updating...' : 'Submitting...') : (editingReport ? 'Update Report' : 'Submit Report')}
               </button>
@@ -647,26 +639,24 @@ function App() {
     );
   }
 
-  // REPORTS
   if (currentPage === 'reports') {
     return (
       <Layout>
-        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', flexWrap: 'wrap', gap: '15px'}}>
-          <h1 style={{margin: 0}}>Reports</h1>
-          <div style={{display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap'}}>
-            <div style={{position: 'relative'}}>
-              <Search style={{position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)'}} size={20} />
+        <div className="page-header">
+          <h1>Reports</h1>
+          <div className="header-actions">
+            <div className="search-wrapper">
+              <Search className="search-icon" size={20} />
               <input
                 type="text"
                 placeholder="Search reports..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-                style={{paddingLeft: '45px'}}
+                className="search-input with-icon"
               />
             </div>
             <button onClick={handleExportExcel} className="btn-success" disabled={loading}>
-              <Download size={18} style={{marginRight: '8px', display: 'inline'}} />
+              <Download size={18} className="btn-icon" />
               Export
             </button>
             {currentUser.role === 'lecturer' && (
@@ -675,27 +665,20 @@ function App() {
           </div>
         </div>
 
-        {/* Feedback Modal */}
         {feedbackReport && (
           <div className="modal-overlay" onClick={() => setFeedbackReport(null)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{maxWidth: '500px'}}>
-              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem'}}>
+            <div className="modal-content modal-feedback" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
                 <h2>Add Feedback</h2>
-                <button onClick={() => setFeedbackReport(null)} style={{background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)'}}>
+                <button onClick={() => setFeedbackReport(null)} className="close-button">
                   <X size={24} />
                 </button>
               </div>
               
-              <div style={{marginBottom: '1rem'}}>
-                <p style={{color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>
-                  <strong>Course:</strong> {feedbackReport.course_name}
-                </p>
-                <p style={{color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>
-                  <strong>Week:</strong> {feedbackReport.week}
-                </p>
-                <p style={{color: 'var(--text-secondary)'}}>
-                  <strong>Lecturer:</strong> {feedbackReport.lecturer_name}
-                </p>
+              <div className="modal-info">
+                <p><strong>Course:</strong> {feedbackReport.course_name}</p>
+                <p><strong>Week:</strong> {feedbackReport.week}</p>
+                <p><strong>Lecturer:</strong> {feedbackReport.lecturer_name}</p>
               </div>
 
               <div className="form-group">
@@ -705,11 +688,10 @@ function App() {
                   onChange={(e) => setFeedbackText(e.target.value)}
                   rows="5"
                   placeholder="Enter your feedback here..."
-                  style={{width: '100%'}}
                 />
               </div>
 
-              <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+              <div className="modal-actions">
                 <button onClick={() => setFeedbackReport(null)} className="btn-secondary">Cancel</button>
                 <button onClick={() => handleAddFeedback(feedbackReport.id)} className="btn-primary" disabled={loading}>
                   {loading ? 'Submitting...' : 'Submit Feedback'}
@@ -721,7 +703,7 @@ function App() {
 
         {filteredReports.length === 0 ? (
           <div className="card">
-            <p style={{color: 'var(--text-secondary)'}}>No reports found</p>
+            <p className="no-data">No reports found</p>
           </div>
         ) : (
           filteredReports.map(report => (
@@ -745,16 +727,15 @@ function App() {
                 <p><strong>Recommendations:</strong> {report.recommendations}</p>
               </div>
               
-              {/* Display existing feedback */}
               {report.feedback && (
-                <div style={{marginTop: '15px', padding: '15px', background: 'var(--card-hover)', borderRadius: '8px', borderLeft: '4px solid var(--primary)'}}>
-                  <p style={{margin: '0 0 5px 0', fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 'bold'}}>FEEDBACK:</p>
-                  <p style={{margin: 0, color: 'var(--text-primary)'}}>{report.feedback}</p>
+                <div className="feedback-box">
+                  <p className="feedback-label">FEEDBACK:</p>
+                  <p className="feedback-text">{report.feedback}</p>
                 </div>
               )}
 
               {currentUser.role === 'prl' && (
-                <div style={{display: 'flex', gap: '10px', marginTop: '15px', paddingTop: '15px', borderTop: '1px solid var(--border)'}}>
+                <div className="report-actions">
                   {report.status === 'pending' && (
                     <>
                       <button onClick={() => handleApprove(report.id)} className="btn-success" disabled={loading}>Approve</button>
@@ -780,9 +761,7 @@ function App() {
     );
   }
 
-  // CLASSES
   if (currentPage === 'classes') {
-    // Extract unique classes from reports
     const classesMap = {};
     reports.forEach(report => {
       const className = report.class_name;
@@ -812,22 +791,22 @@ function App() {
         <h1>Classes</h1>
         <div className="stats-container">
           <div className="stat-card blue">
-            <Users size={40} style={{marginBottom: '1rem', opacity: 0.8}} />
+            <Users size={40} className="stat-icon" />
             <h3>{classes.length}</h3>
             <p>Total Classes</p>
           </div>
           <div className="stat-card green">
-            <Users size={40} style={{marginBottom: '1rem', opacity: 0.8}} />
+            <Users size={40} className="stat-icon" />
             <h3>{totalStudents}</h3>
             <p>Total Students</p>
           </div>
           <div className="stat-card yellow">
-            <BarChart3 size={40} style={{marginBottom: '1rem', opacity: 0.8}} />
+            <BarChart3 size={40} className="stat-icon" />
             <h3>{avgClassSize}</h3>
             <p>Avg Class Size</p>
           </div>
           <div className="stat-card purple">
-            <FileText size={40} style={{marginBottom: '1rem', opacity: 0.8}} />
+            <FileText size={40} className="stat-icon" />
             <h3>{reports.length}</h3>
             <p>Total Reports</p>
           </div>
@@ -835,25 +814,22 @@ function App() {
 
         {classes.length === 0 ? (
           <div className="card">
-            <p style={{color: 'var(--text-secondary)', textAlign: 'center'}}>No classes found. Reports need to be created first.</p>
+            <p className="no-data center">No classes found. Reports need to be created first.</p>
           </div>
         ) : (
           <div className="classes-grid">
             {classes.map((cls, index) => (
               <div key={index} className="class-card">
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px'}}>
-                  <h3 style={{margin: 0}}>{cls.name}</h3>
+                <div className="class-header">
+                  <h3>{cls.name}</h3>
                   <span className="badge approved">{cls.reports} Reports</span>
                 </div>
-                <p style={{marginBottom: '10px', color: 'var(--text-secondary)'}}>👨‍🏫 {cls.lecturer}</p>
-                <p style={{marginBottom: '10px', color: 'var(--text-secondary)'}}>👥 {cls.students} Students</p>
-                <p style={{marginBottom: '10px', color: 'var(--text-secondary)'}}>🏫 {cls.venue}</p>
-                <p style={{marginBottom: '15px', fontSize: '12px', color: 'var(--text-secondary)'}}>
-                  Last activity: {cls.lastActivity}
-                </p>
+                <p className="class-info">👨‍🏫 {cls.lecturer}</p>
+                <p className="class-info">👥 {cls.students} Students</p>
+                <p className="class-info">🏫 {cls.venue}</p>
+                <p className="class-activity">Last activity: {cls.lastActivity}</p>
                 <button 
-                  className="btn-primary" 
-                  style={{width: '100%'}}
+                  className="btn-primary full-width"
                   onClick={() => {
                     setSearchTerm(cls.name);
                     setCurrentPage('reports');
@@ -869,12 +845,9 @@ function App() {
     );
   }
 
-  // MONITORING
   if (currentPage === 'monitoring') {
-    // Generate activities from actual reports and ratings
     const activities = [];
 
-    // Add report activities
     reports.forEach(report => {
       activities.push({
         id: `report-${report.id}`,
@@ -887,7 +860,6 @@ function App() {
         status: report.status
       });
 
-      // Add approval/rejection activities
       if (report.status === 'approved') {
         activities.push({
           id: `approve-${report.id}`,
@@ -912,7 +884,6 @@ function App() {
         });
       }
 
-      // Add feedback activities if feedback exists
       if (report.feedback) {
         activities.push({
           id: `feedback-${report.id}`,
@@ -927,7 +898,6 @@ function App() {
       }
     });
 
-    // Add rating activities
     ratings.forEach(rating => {
       const report = reports.find(r => r.id === rating.report_id);
       activities.push({
@@ -942,10 +912,8 @@ function App() {
       });
     });
 
-    // Sort activities by timestamp (most recent first)
     const sortedActivities = activities.sort((a, b) => b.timestamp - a.timestamp).slice(0, 20);
 
-    // Calculate time ago
     const getTimeAgo = (timestamp) => {
       const now = Date.now();
       const diff = now - timestamp;
@@ -979,22 +947,22 @@ function App() {
         <h1>Activity Monitoring</h1>
         <div className="stats-container">
           <div className="stat-card blue">
-            <FileText size={40} style={{marginBottom: '1rem', opacity: 0.8}} />
+            <FileText size={40} className="stat-icon" />
             <h3>{reports.length}</h3>
             <p>Total Reports</p>
           </div>
           <div className="stat-card green">
-            <Check size={40} style={{marginBottom: '1rem', opacity: 0.8}} />
+            <Check size={40} className="stat-icon" />
             <h3>{approvedCount}</h3>
             <p>Approved</p>
           </div>
           <div className="stat-card yellow">
-            <Calendar size={40} style={{marginBottom: '1rem', opacity: 0.8}} />
+            <Calendar size={40} className="stat-icon" />
             <h3>{pendingCount}</h3>
             <p>Pending</p>
           </div>
           <div className="stat-card red">
-            <Star size={40} style={{marginBottom: '1rem', opacity: 0.8}} />
+            <Star size={40} className="stat-icon" />
             <h3>{ratings.length}</h3>
             <p>Ratings</p>
           </div>
@@ -1003,20 +971,18 @@ function App() {
         <div className="card">
           <h2>Recent Activity</h2>
           {sortedActivities.length === 0 ? (
-            <p style={{color: 'var(--text-secondary)', textAlign: 'center', padding: '2rem'}}>No activities yet</p>
+            <p className="no-data center">No activities yet</p>
           ) : (
             sortedActivities.map(activity => (
               <div key={activity.id} className="activity-item">
                 <div className="activity-icon">{getIcon(activity.type)}</div>
-                <div style={{flex: 1}}>
-                  <h4 style={{margin: '0 0 5px 0'}}>{activity.user}</h4>
-                  <p style={{margin: '0 0 5px 0', color: 'var(--text-secondary)'}}>
+                <div className="activity-content">
+                  <h4>{activity.user}</h4>
+                  <p className="activity-action">
                     <strong>{activity.action}</strong> - {activity.course}
-                    {activity.rating && <span style={{marginLeft: '10px', color: 'var(--warning)'}}>★ {activity.rating}/5</span>}
+                    {activity.rating && <span className="rating-inline">★ {activity.rating}/5</span>}
                   </p>
-                  <span style={{fontSize: '12px', color: 'var(--text-secondary)', fontStyle: 'italic'}}>
-                    {getTimeAgo(activity.timestamp)}
-                  </span>
+                  <span className="activity-time">{getTimeAgo(activity.timestamp)}</span>
                 </div>
                 {activity.status && (
                   <span className={`badge ${activity.status}`}>{activity.status}</span>
@@ -1029,7 +995,6 @@ function App() {
     );
   }
 
-  // RATING
   if (currentPage === 'rating') {
     const averageRating = ratings.length > 0 
       ? (ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length).toFixed(1)
@@ -1037,103 +1002,161 @@ function App() {
 
     return (
       <Layout>
-        <h1>Lecture Ratings</h1>
+        <div className="page-title-section">
+          <h1>Ratings</h1>
+        </div>
+
         <div className="stats-container">
           <div className="stat-card yellow">
-            <h3>{averageRating} ⭐</h3>
+            <Star size={40} className="stat-icon" />
+            <h3>{averageRating} ★</h3>
             <p>Average Rating</p>
           </div>
-          <div className="stat-card blue">
+
+          <div className="stat-card purple">
+            <Award size={40} className="stat-icon" />
             <h3>{ratings.length}</h3>
             <p>Total Ratings</p>
           </div>
+
           <div className="stat-card green">
+            <TrendingUp size={40} className="stat-icon" />
             <h3>{ratings.filter(r => r.rating >= 4).length}</h3>
-            <p>Positive</p>
+            <p>Positive Reviews</p>
           </div>
-          <div className="stat-card red">
+
+          <div className="stat-card blue">
+            <FileText size={40} className="stat-icon" />
             <h3>{reports.length}</h3>
-            <p>Reports</p>
+            <p>Available Reports</p>
           </div>
         </div>
 
-        <div className="card">
-          <h2>Submit Rating</h2>
-          <div className="form-group">
-            <label>Select Report</label>
-            <select value={selectedReport || ''} onChange={(e) => setSelectedReport(e.target.value)}>
-              <option value="">Choose a report...</option>
-              {reports.map(report => (
-                <option key={report.id} value={report.id}>
-                  {report.course_name} - {report.week} ({report.date})
-                </option>
-              ))}
-            </select>
+        <div className="rating-grid">
+          <div className="card">
+            <h2>Submit Your Rating</h2>
+            
+            <div className="form-group">
+              <label>Select Report</label>
+              <select 
+                value={selectedReport || ''} 
+                onChange={(e) => setSelectedReport(e.target.value)}
+                className="rating-select"
+              >
+                <option value="">Choose a report...</option>
+                {reports.map(report => (
+                  <option key={report.id} value={report.id}>
+                    {report.course_name} - {report.week} ({report.date})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Your Rating</label>
+              <div className="star-rating">
+                {[1, 2, 3, 4, 5].map(star => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setRating(star)}
+                    className={`star-button ${rating >= star ? 'filled' : ''}`}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
+              <p className="rating-label">
+                {rating === 0 && 'Click to rate'}
+                {rating === 1 && 'Poor'}
+                {rating === 2 && 'Fair'}
+                {rating === 3 && 'Good'}
+                {rating === 4 && 'Very Good'}
+                {rating === 5 && 'Excellent'}
+              </p>
+            </div>
+
+            <div className="form-group">
+              <label>Comment (Optional)</label>
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                rows="4"
+                placeholder="Share your thoughts about the lecture..."
+                className="rating-textarea"
+              />
+            </div>
+
+            <button 
+              onClick={handleSubmitRating} 
+              disabled={loading}
+              className="btn-primary full-width"
+            >
+              {loading ? 'Submitting...' : 'Submit Rating'}
+            </button>
           </div>
 
-          <div className="form-group">
-            <label>Your Rating</label>
-            <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
-              {[1, 2, 3, 4, 5].map(star => (
-                <span
-                  key={star}
-                  className={`star ${rating >= star ? 'filled' : ''}`}
-                  onClick={() => setRating(star)}
-                  style={{fontSize: '36px', cursor: 'pointer', color: rating >= star ? 'var(--warning)' : 'var(--border)'}}
-                >
-                  ★
-                </span>
-              ))}
-              <span style={{marginLeft: '10px', fontSize: '18px', color: 'var(--text-secondary)'}}>
-                {rating > 0 ? `${rating} / 5` : 'Click to rate'}
-              </span>
+          <div className="card">
+            <h2>Rating Distribution</h2>
+            
+            {[5, 4, 3, 2, 1].map(star => {
+              const count = ratings.filter(r => Math.floor(r.rating) === star).length;
+              const percentage = ratings.length > 0 ? (count / ratings.length) * 100 : 0;
+              
+              return (
+                <div key={star} className="distribution-item">
+                  <div className="distribution-header">
+                    <div className="star-label">{star} ★</div>
+                    <span className="distribution-count">{count} ({percentage.toFixed(0)}%)</span>
+                  </div>
+                  <div className="distribution-bar">
+                    <div className="distribution-fill" data-width={percentage}></div>
+                  </div>
+                </div>
+              );
+            })}
+
+            <div className="distribution-summary">
+              <p>
+                <strong>{ratings.length}</strong> total ratings • <strong>{averageRating}</strong> average
+              </p>
             </div>
           </div>
-
-          <div className="form-group">
-            <label>Comment (Optional)</label>
-            <textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              rows="3"
-              placeholder="Share your feedback..."
-            />
-          </div>
-
-          <button onClick={handleSubmitRating} className="btn-primary" disabled={loading}>
-            {loading ? 'Submitting...' : 'Submit Rating'}
-          </button>
         </div>
 
         <div className="card">
-          <h2>All Ratings</h2>
+          <h2>All Ratings & Reviews</h2>
+          
           {ratings.length === 0 ? (
-            <p style={{color: 'var(--text-secondary)'}}>No ratings yet</p>
+            <div className="empty-state">
+              <Star size={64} className="empty-icon" />
+              <p>No ratings yet. Be the first to rate a lecture!</p>
+            </div>
           ) : (
-            <div>
+            <div className="reviews-container">
               {ratings.map(r => {
                 const report = reports.find(rep => rep.id === r.report_id);
                 return (
-                  <div key={r.id} style={{padding: '20px', background: 'var(--card-hover)', borderRadius: '12px', marginBottom: '15px', borderLeft: '4px solid var(--warning)'}}>
-                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '10px'}}>
+                  <div key={r.id} className="review-card">
+                    <div className="review-header">
                       <div>
-                        <h4 style={{margin: '0 0 5px 0'}}>{report ? report.course_name : r.course_name || 'Unknown Course'}</h4>
-                        <p style={{margin: 0, fontSize: '14px', color: 'var(--text-secondary)'}}>by {r.user_name || r.user || 'Anonymous'}</p>
+                        <h4>{report ? report.course_name : r.course_name || 'Unknown Course'}</h4>
+                        <p className="review-author">by {r.user_name || r.user || 'Anonymous'}</p>
                       </div>
-                      <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
-                        <span style={{fontSize: '20px', color: 'var(--warning)'}}>
+                      <div className="review-rating">
+                        <span className="stars-display">
                           {'★'.repeat(Math.floor(r.rating))}{'☆'.repeat(5 - Math.floor(r.rating))}
                         </span>
-                        <span style={{color: 'var(--text-secondary)'}}>{r.rating}/5</span>
+                        <span className="rating-value">{r.rating}/5</span>
                       </div>
                     </div>
+                    
                     {r.comment && (
-                      <p style={{margin: '15px 0 10px 0', padding: '10px', background: 'var(--card-bg)', borderRadius: '8px', fontStyle: 'italic', color: 'var(--text-secondary)'}}>
-                        {r.comment}
-                      </p>
+                      <p className="review-comment">"{r.comment}"</p>
                     )}
-                    <span style={{fontSize: '12px', color: 'var(--text-secondary)'}}>
-                      {new Date(r.created_at).toLocaleDateString()}
+                    
+                    <span className="review-date">
+                      {new Date(r.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                     </span>
                   </div>
                 );
@@ -1147,9 +1170,9 @@ function App() {
 
   return (
     <Layout>
-      <h1>{currentPage.charAt(0).toUpperCase() + currentPage.slice(1)}</h1>
-      <div className="card">
-        <p style={{color: 'var(--text-secondary)'}}>This page is under development.</p>
+      <div className="placeholder-page">
+        <h1>{currentPage.charAt(0).toUpperCase() + currentPage.slice(1)}</h1>
+        <p>This page is under development.</p>
       </div>
     </Layout>
   );
