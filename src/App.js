@@ -347,13 +347,12 @@ function App() {
               <BookOpen className="text-white" size={40} />
             </div>
             <h1 className="text-3xl font-bold mb-2">LUCT</h1>
-            <h2>Faculty Reporting System</h2>
           </div>
           
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="form-group">
               <label>Email</label>
-              <input type="email" name="email" placeholder="your.email@luct.ac.ls" required />
+              <input type="email" name="email" placeholder="name" required />
             </div>
             <div className="form-group">
               <label>Password</label>
